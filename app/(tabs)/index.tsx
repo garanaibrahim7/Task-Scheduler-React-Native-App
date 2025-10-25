@@ -1,98 +1,333 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, Alert } from 'react-native';
+import { useTaskContext } from '@/app/contexts/TaskContext';
+import { TaskWithCompletion } from '@/types/tasks';
+import { CheckCircle, Circle, Clock, AlertCircle, Trash2, RefreshCw } from 'lucide-react-native';
+import { useState } from 'react';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+export default function TasksScreen() {
+  const { tasks, loading, stats, fetchTasks, toggleTaskCompletion, deleteTask, resetDailyTasks } = useTaskContext();
+  const [refreshing, setRefreshing] = useState(false);
 
-export default function HomeScreen() {
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchTasks();
+    setRefreshing(false);
+  };
+
+  const handleToggleComplete = async (taskId: string, isCompleted: boolean) => {
+    await toggleTaskCompletion(taskId, !isCompleted);
+  };
+
+  const handleDeleteTask = (taskId: string, taskTitle: string) => {
+    Alert.alert(
+      'Delete Task',
+      `Are you sure you want to delete "${taskTitle}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteTask(taskId),
+        },
+      ]
+    );
+  };
+
+  const handleResetDaily = async () => {
+    Alert.alert(
+      'Reset Daily Tasks',
+      'This will refresh the task list and reset completion status for new day.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          onPress: async () => {
+            await resetDailyTasks();
+            Alert.alert('Success', 'Daily tasks have been reset!');
+          },
+        },
+      ]
+    );
+  };
+
+  const isTaskOverdue = (task: TaskWithCompletion) => {
+    if (task.isCompletedToday) return false;
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const [hours, minutes] = task.scheduled_time.split(':').map(Number);
+    const taskTime = hours * 60 + minutes;
+    return currentTime > taskTime + task.reminder_offset;
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return '#ef4444';
+      case 'medium':
+        return '#f59e0b';
+      case 'low':
+        return '#10b981';
+      default:
+        return '#64748b';
+    }
+  };
+
+  const renderTask = ({ item }: { item: TaskWithCompletion }) => {
+    const overdue = isTaskOverdue(item);
+
+    return (
+      <View style={[styles.taskCard, item.isCompletedToday && styles.taskCardCompleted]}>
+        <TouchableOpacity
+          style={styles.taskContent}
+          onPress={() => handleToggleComplete(item.id, item.isCompletedToday)}
+        >
+          <View style={styles.taskLeft}>
+            {item.isCompletedToday ? (
+              <CheckCircle size={24} color="#10b981" />
+            ) : (
+              <Circle size={24} color="#64748b" />
+            )}
+            <View style={styles.taskInfo}>
+              <Text
+                style={[
+                  styles.taskTitle,
+                  item.isCompletedToday && styles.taskTitleCompleted,
+                ]}
+              >
+                {item.title}
+              </Text>
+              <View style={styles.taskMeta}>
+                <Clock size={14} color="#64748b" />
+                <Text style={styles.taskTime}>{item.scheduled_time}</Text>
+                <View
+                  style={[styles.priorityBadge, { backgroundColor: getPriorityColor(item.priority) }]}
+                >
+                  <Text style={styles.priorityText}>{item.priority}</Text>
+                </View>
+                <View style={styles.categoryBadge}>
+                  <Text style={styles.categoryText}>{item.category}</Text>
+                </View>
+              </View>
+              <Text style={styles.repeatText}>
+                Repeat: {item.repeat_type}
+                {item.repeat_type === 'weekly' &&
+                  ` (${JSON.parse(item.repeat_days as string).length} days)`}
+              </Text>
+            </View>
+          </View>
+          {overdue && (
+            <AlertCircle size={20} color="#ef4444" style={styles.overdueIcon} />
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDeleteTask(item.id, item.title)}
+        >
+          <Trash2 size={20} color="#ef4444" />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <View style={styles.container}>
+      <View style={styles.statsContainer}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{stats.completedToday}</Text>
+          <Text style={styles.statLabel}>Completed</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{stats.totalTasks}</Text>
+          <Text style={styles.statLabel}>Total</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{stats.completionRate}%</Text>
+          <Text style={styles.statLabel}>Rate</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={[styles.statValue, stats.overdueCount > 0 && styles.statValueOverdue]}>
+            {stats.overdueCount}
+          </Text>
+          <Text style={styles.statLabel}>Overdue</Text>
+        </View>
+      </View>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Today's Tasks</Text>
+        <TouchableOpacity onPress={handleResetDaily} style={styles.resetButton}>
+          <RefreshCw size={20} color="#2563eb" />
+        </TouchableOpacity>
+      </View>
+
+      {tasks.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No tasks yet!</Text>
+          <Text style={styles.emptySubtext}>Add your first task to get started</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={tasks}
+          renderItem={renderTask}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContainer}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#2563eb']} />
+          }
+        />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 12,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#f1f5f9',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  statValueOverdue: {
+    color: '#ef4444',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 4,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#ffffff',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  resetButton: {
+    padding: 8,
+  },
+  listContainer: {
+    padding: 16,
+    gap: 12,
+  },
+  taskCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  stepContainer: {
-    gap: 8,
+  taskCardCompleted: {
+    opacity: 0.7,
+    backgroundColor: '#f0fdf4',
+  },
+  taskContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  taskLeft: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  taskInfo: {
+    flex: 1,
+  },
+  taskTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  taskTitleCompleted: {
+    textDecorationLine: 'line-through',
+    color: '#64748b',
+  },
+  taskMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  taskTime: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  priorityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  priorityText: {
+    fontSize: 11,
+    color: '#ffffff',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  categoryBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    backgroundColor: '#e0e7ff',
+  },
+  categoryText: {
+    fontSize: 11,
+    color: '#3730a3',
+    fontWeight: '600',
+  },
+  repeatText: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  overdueIcon: {
+    marginLeft: 8,
+  },
+  deleteButton: {
+    padding: 8,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  emptyText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#64748b',
     marginBottom: 8,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  emptySubtext: {
+    fontSize: 14,
+    color: '#94a3b8',
   },
 });

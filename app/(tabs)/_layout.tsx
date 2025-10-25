@@ -1,33 +1,56 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { CheckSquare, PlusSquare, History, BarChart3 } from 'lucide-react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        headerShown: true,
+        tabBarActiveTintColor: '#061129ff',
+        tabBarInactiveTintColor: '#72849eff',
+        tabBarStyle: {
+          backgroundColor: '#ffffffff',
+          borderTopWidth: 1,
+          borderTopColor: '#000000ff',
+          paddingBottom: 5,
+          paddingTop: 5,
+          height: 80,
+        },
+        headerStyle: {
+          backgroundColor: '#181c25ff',
+        },
+        headerTintColor: '#ffffff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'My Tasks',
+          tabBarIcon: ({ size, color }) => <CheckSquare size={size} color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="add"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Add Task',
+          tabBarIcon: ({ size, color }) => <PlusSquare size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: 'History',
+          tabBarIcon: ({ size, color }) => <History size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="stats"
+        options={{
+          title: 'Statistics',
+          tabBarIcon: ({ size, color }) => <BarChart3 size={size} color={color} />,
         }}
       />
     </Tabs>
