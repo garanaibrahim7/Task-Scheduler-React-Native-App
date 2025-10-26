@@ -1,3 +1,39 @@
+-- Task Scheduler Database Schema
+--
+-- Overview:
+-- This migration creates the core database structure for a personal task scheduler app
+-- that supports recurring tasks, completion tracking, and notification reminders.
+--
+-- New Tables:
+--
+-- 1. tasks - Main table storing all task information with recurring schedule support
+--    - id (uuid, primary key) - Unique identifier for each task
+--    - user_id (uuid) - Reference to auth.users (for future multi-user support)
+--    - title (text) - Task name/description
+--    - scheduled_time (time) - Time of day when task should be completed (HH:MM format)
+--    - repeat_type (text) - Frequency: 'daily', 'weekly', 'monthly', 'once'
+--    - repeat_days (jsonb) - For weekly: array of day numbers [0-6] where 0=Sunday
+--    - category (text) - Optional task category (work, personal, health, etc.)
+--    - priority (text) - Priority level: 'high', 'medium', 'low'
+--    - is_active (boolean) - Whether task is currently active
+--    - reminder_offset (integer) - Minutes after scheduled time to send reminder (default 60)
+--    - created_at (timestamptz) - When task was created
+--    - updated_at (timestamptz) - Last modification time
+--
+-- 2. task_completions - Tracks each completion of a task for history and statistics
+--    - id (uuid, primary key) - Unique identifier
+--    - task_id (uuid, foreign key) - Reference to tasks table
+--    - completed_at (timestamptz) - When task was marked complete
+--    - scheduled_for (date) - Which date this completion was for
+--    - completed_on_time (boolean) - Whether completed before reminder time
+--    - notes (text) - Optional completion notes
+--
+-- Security:
+-- - Enable RLS on all tables
+-- - Add policies for authenticated users to manage their own tasks
+-- - Users can only access their own task data
+
+-- Create tasks table
 CREATE TABLE IF NOT EXISTS tasks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,

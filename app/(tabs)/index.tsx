@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, Alert } from 'react-native';
-import { useTaskContext } from '@/app/contexts/TaskContext';
+import { useTaskContext } from '../contexts/TaskContext';
+import { useAuth } from '../contexts/AuthContext';
 import { TaskWithCompletion } from '@/types/tasks';
-import { CheckCircle, Circle, Clock, AlertCircle, Trash2, RefreshCw } from 'lucide-react-native';
-import { useState } from 'react';
+import { CheckCircle, Circle, Clock, AlertCircle, Trash2, RefreshCw, LogOut } from 'lucide-react-native';
+import { useEffect, useState } from 'react';
 
 export default function TasksScreen() {
   const { tasks, loading, stats, fetchTasks, toggleTaskCompletion, deleteTask, resetDailyTasks } = useTaskContext();
+  const { user, signOut } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = async () => {
@@ -13,6 +15,10 @@ export default function TasksScreen() {
     await fetchTasks();
     setRefreshing(false);
   };
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
   const handleToggleComplete = async (taskId: string, isCompleted: boolean) => {
     await toggleTaskCompletion(taskId, !isCompleted);
@@ -34,7 +40,20 @@ export default function TasksScreen() {
   };
 
   const handleResetDaily = async () => {
-    await resetDailyTasks();
+    Alert.alert(
+      'Reset Daily Tasks',
+      'This will refresh the task list and reset completion status for new day.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          onPress: async () => {
+            await resetDailyTasks();
+            Alert.alert('Success', 'Daily tasks have been reset!');
+          },
+        },
+      ]
+    );
   };
 
   const isTaskOverdue = (task: TaskWithCompletion) => {
@@ -116,8 +135,11 @@ export default function TasksScreen() {
     );
   };
 
+  
+
   return (
-    <View style={styles.container}>
+    <View style={styles.container}>      
+
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>{stats.completedToday}</Text>
@@ -141,9 +163,9 @@ export default function TasksScreen() {
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Today's Tasks</Text>
-        {/* <TouchableOpacity onPress={handleResetDaily} style={styles.resetButton}>
-          <RefreshCw size={20} color="#2563eb" />
-        </TouchableOpacity> */}
+        <TouchableOpacity onPress={handleResetDaily} style={styles.resetButton}>
+          <RefreshCw size={20} color="#1d4aabff" />
+        </TouchableOpacity>
       </View>
 
       {tasks.length === 0 ? (
@@ -170,7 +192,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
-  },
+  },  
   statsContainer: {
     flexDirection: 'row',
     padding: 16,
@@ -181,7 +203,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#e5f1fdd9',
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',

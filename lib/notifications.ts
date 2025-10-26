@@ -1,5 +1,5 @@
-import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 import { TaskWithCompletion } from '@/types/tasks';
 
 Notifications.setNotificationHandler({
@@ -59,7 +59,7 @@ export async function scheduleTaskReminder(task: TaskWithCompletion) {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Task Reminder',
-        body: `You Didn't Completed ${task.title} yet!`,
+        body: `Don't forget: ${task.title}`,
         data: { taskId: task.id },
         sound: true,
       },
@@ -83,7 +83,7 @@ export async function cancelTaskReminder(taskId: string) {
   for (const notification of scheduledNotifications) {
     if (notification.content.data?.taskId === taskId) {
       await Notifications.cancelScheduledNotificationAsync(notification.identifier);
-      // console.log(`Cancelled notification for task: ${taskId}`);
+      console.log(`Cancelled notification for task: ${taskId}`);
     }
   }
 }

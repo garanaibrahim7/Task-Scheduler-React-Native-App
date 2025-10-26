@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import {
   View,
   Text,
@@ -7,34 +7,64 @@ import {
   RefreshControl,
   TouchableOpacity,
 } from 'react-native';
+import { supabase } from '@/lib/supabase';
 import { TaskCompletion } from '@/types/database';
 import { CheckCircle, Calendar, Clock } from 'lucide-react-native';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { router } from 'expo-router';
 
 interface CompletionWithTask extends TaskCompletion {
   task_title?: string;
+  user_id?: string;
 }
 
 export default function HistoryScreen() {
+  const user = useAuth().user;
   const [completions, setCompletions] = useState<CompletionWithTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'week' | 'month'>('week');
 
+  useEffect(() => {
+    if(user) {
+      fetchHistory();
+    }
+  }, []);
+
+  // useEffect(() => {
+  //   fetchHistory();
+  //   console.log(userId);    
+  // }, [userId]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [filter]);
+
   const fetchHistory = async () => {
+    // console.log(userId);
     try {
       setLoading(true);
+      const tmpId = String(user?.id);
+      console.log(tmpId);
+      
+      if (!tmpId) {
+        setCompletions([]);
+        setLoading(false);
+        router.replace('/(auth)/login');
+        return;
+      }
 
       let query = supabase
         .from('task_completions')
         .select(
           `
           *,
-          tasks (
-            title
+          tasks!inner (
+            title, user_id
           )
         `
         )
+        .eq('tasks.user_id', tmpId)
         .order('completed_at', { ascending: false });
 
       const today = new Date();
@@ -58,6 +88,7 @@ export default function HistoryScreen() {
         completed_on_time: item.completed_on_time,
         notes: item.notes,
         task_title: item.tasks?.title || 'Unknown Task',
+        user_id: item.tasks?.user_id || 'Unknown User',
       }));
 
       setCompletions(formattedData);
@@ -68,9 +99,6 @@ export default function HistoryScreen() {
     }
   };
 
-  useEffect(() => {
-    fetchHistory();
-  }, [filter]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -111,6 +139,7 @@ export default function HistoryScreen() {
       items,
     }));
   };
+  // console.log(completions.map(c => c.user_id));
 
   const renderCompletion = ({ item }: { item: CompletionWithTask }) => (
     <View style={styles.completionCard}>
@@ -231,8 +260,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   filterButtonActive: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
+    backgroundColor: '#2c4f9eff',
+    borderColor: '#000000ff',
   },
   filterButtonText: {
     fontSize: 14,
@@ -269,7 +298,7 @@ const styles = StyleSheet.create({
   dateBadgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#2563eb',
+    color: '#133681ff',
   },
   completionCard: {
     backgroundColor: '#ffffff',

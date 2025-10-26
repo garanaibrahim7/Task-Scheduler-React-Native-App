@@ -6,9 +6,11 @@ import {
   ScrollView,
   RefreshControl,
   Dimensions,
+  Alert,
+  TouchableOpacity,
   Linking,
 } from 'react-native';
-import { useTaskContext } from '@/app/contexts/TaskContext';
+import { useTaskContext } from '../contexts/TaskContext';
 import { supabase } from '@/lib/supabase';
 import {
   TrendingUp,
@@ -17,7 +19,9 @@ import {
   Award,
   Clock,
   CheckCircle2,
+  LogOut,
 } from 'lucide-react-native';
+import { useAuth } from '../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
@@ -31,6 +35,7 @@ interface WeeklyStats {
 }
 
 export default function StatsScreen() {
+  const { user, signOut } = useAuth();
   const { stats, tasks } = useTaskContext();
   const [refreshing, setRefreshing] = useState(false);
   const [weeklyStats, setWeeklyStats] = useState<WeeklyStats>({
@@ -41,6 +46,20 @@ export default function StatsScreen() {
     bestDay: 'N/A',
     worstDay: 'N/A',
   });
+
+
+  const handleSignOut = async () => {
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          await signOut();
+        },
+      },
+    ]);
+  };
 
   const fetchWeeklyStats = async () => {
     try {
@@ -124,6 +143,15 @@ export default function StatsScreen() {
       }
     >
       <View style={styles.content}>
+        <View style={styles.userBar}>
+          <View>
+            <Text style={styles.userEmail}>{user?.email}</Text>
+            <Text style={styles.userLabel}>Signed in</Text>
+          </View>
+          <TouchableOpacity onPress={handleSignOut} style={styles.signOutButton}>
+            <LogOut size={20} color="#ef4444" />
+          </TouchableOpacity>
+        </View>
         <View style={styles.heroCard}>
           <TrendingUp size={32} color="#2563eb" />
           <Text style={styles.heroValue}>{stats.completionRate}%</Text>
@@ -236,25 +264,26 @@ export default function StatsScreen() {
                   : '💪 Stay focused! Break down tasks and tackle them one at a time.'}
             </Text>
           </View>
+
+          {stats.overdueCount > 0 && (
+            <View style={[styles.insightCard, styles.warningCard]}>
+              <Text style={styles.insightText}>
+                You have {stats.overdueCount} overdue {stats.overdueCount === 1 ? 'task' : 'tasks'}.
+                Try to complete them soon!
+              </Text>
+            </View>
+          )}
+
+          {weeklyStats.onTimeCount > weeklyStats.lateCount && weeklyStats.onTimeCount > 0 && (
+            <View style={[styles.insightCard, styles.successCard]}>
+              <Text style={styles.insightText}>
+                You completed {weeklyStats.onTimeCount} tasks on time this week. Excellent time
+                management!
+              </Text>
+            </View>
+          )}
         </View>
 
-        {stats.overdueCount > 0 && (
-          <View style={[styles.insightCard, styles.warningCard]}>
-            <Text style={styles.insightText}>
-              You have {stats.overdueCount} overdue {stats.overdueCount === 1 ? 'task' : 'tasks'}.
-              Try to complete them soon!
-            </Text>
-          </View>
-        )}
-
-        {weeklyStats.onTimeCount > weeklyStats.lateCount && weeklyStats.onTimeCount > 0 && (
-          <View style={[styles.insightCard, styles.successCard]}>
-            <Text style={styles.insightText}>
-              You completed {weeklyStats.onTimeCount} tasks on time this week. Excellent time
-              management!
-            </Text>
-          </View>
-        )}
         <View style={[styles.insightCard, styles.infoCard]}>
           <Text style={styles.insightText}>
             This App Concept is by{' '}
@@ -274,6 +303,7 @@ export default function StatsScreen() {
             with Integrated Supbase.
           </Text>
         </View>
+
       </View>
     </ScrollView>
   );
@@ -283,6 +313,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8fafc',
+  },
+  userBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  userEmail: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  userLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  signOutButton: {
+    padding: 8,
   },
   content: {
     padding: 16,
@@ -335,6 +387,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+  },
+  infoCard: {
+    borderLeftColor: '#0d3458ff',
+    backgroundColor: '#f0fdf4',
   },
   statIcon: {
     width: 48,
@@ -446,10 +502,6 @@ const styles = StyleSheet.create({
   },
   successCard: {
     borderLeftColor: '#10b981',
-    backgroundColor: '#f0fdf4',
-  },
-  infoCard: {
-    borderLeftColor: '#0d3458ff',
     backgroundColor: '#f0fdf4',
   },
   insightText: {

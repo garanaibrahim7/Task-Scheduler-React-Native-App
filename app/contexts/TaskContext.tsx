@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
+import { supabase } from '@/lib/supabase';
 import { Task, TaskInsert, TaskUpdate, TaskCompletionInsert } from '@/types/database';
-
+import { TaskWithCompletion, TaskStats } from '@/types/tasks';
 import { Alert } from 'react-native';
 import {
   scheduleAllTaskReminders,
@@ -9,8 +9,8 @@ import {
   requestNotificationPermissions,
   scheduleDailyReset,
 } from '@/lib/notifications';
-import { supabase } from '@/lib/supabase';
-import { TaskStats, TaskWithCompletion } from '@/types/tasks';
+import { router } from 'expo-router';
+import { useAuth } from './AuthContext';
 
 interface TaskContextType {
   tasks: TaskWithCompletion[];
@@ -27,6 +27,7 @@ interface TaskContextType {
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export function TaskProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<TaskWithCompletion[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<TaskStats>({
@@ -37,8 +38,16 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     overdueCount: 0,
   });
 
+  
   const fetchTasks = async () => {
     try {
+      if (!user) {
+        router.replace('/(auth)/login');
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       const today = new Date().toISOString().split('T')[0];
 
@@ -46,6 +55,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         .from('tasks')
         .select('*')
         .eq('is_active', true)
+        .eq('user_id', user.id)
         .order('scheduled_time', { ascending: true });
 
       if (tasksError) throw tasksError;
@@ -133,7 +143,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
   const deleteTask = async (id: string) => {
     try {
-      // await cancelTaskReminder(id);
+      await cancelTaskReminder(id);
 
       const { error } = await supabase.from('tasks').delete().eq('id', id);
 
@@ -188,10 +198,11 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     await fetchTasks();
   };
 
+  
   useEffect(() => {
     const initialize = async () => {
-      // await requestNotificationPermissions();
-      // await scheduleDailyReset();
+      await requestNotificationPermissions();
+      await scheduleDailyReset();
       await fetchTasks();
     };
 

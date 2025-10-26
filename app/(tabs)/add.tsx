@@ -9,11 +9,11 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import { useTaskContext } from '../contexts/TaskContext';
 import { TaskInsert } from '@/types/database';
+import { RepeatType, TaskCategory, TaskPriority } from '@/types/tasks';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Clock } from 'lucide-react-native';
-import { useTaskContext } from '@/app/contexts/TaskContext';
-import { RepeatType, TaskCategory, TaskPriority } from '@/types/tasks';
 
 const REPEAT_OPTIONS: RepeatType[] = ['once', 'daily', 'weekly', 'monthly'];
 const CATEGORY_OPTIONS: TaskCategory[] = ['personal', 'work', 'health', 'shopping', 'other'];
@@ -112,7 +112,7 @@ export default function AddTaskScreen() {
             style={styles.timeButton}
             onPress={() => setShowTimePicker(true)}
           >
-            <Clock size={20} color="#2563eb" />
+            <Clock size={20} color="#1f376bff" />
             <Text style={styles.timeButtonText}>{formatTime(time)}</Text>
           </TouchableOpacity>
           {showTimePicker && (
@@ -304,8 +304,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   optionButtonActive: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
+    backgroundColor: '#335aaeff',
+    borderColor: '#152852ff',
   },
   optionButtonText: {
     fontSize: 14,
@@ -342,8 +342,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   weekdayButtonActive: {
-    backgroundColor: '#2563eb',
-    borderColor: '#2563eb',
+    backgroundColor: '#000000ff',
+    borderColor: '#5f5f5fff',
   },
   weekdayButtonText: {
     fontSize: 14,
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   submitButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#214480ff',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
