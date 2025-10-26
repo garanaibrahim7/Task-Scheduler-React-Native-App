@@ -16,7 +16,7 @@ Users can add tasks with specific titles, scheduled times, categories, prioritie
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/garanaibrahim7/Task-Scheduler-React-Native-App
    ```
 2. Navigate to the project directory:
    ```bash
