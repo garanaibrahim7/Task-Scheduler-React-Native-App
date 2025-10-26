@@ -1,50 +1,69 @@
-# Welcome to your Expo app 👋
+## Overview
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+The Task Scheduler App is a personal mobile application designed to manage daily tasks efficiently. 
+Users can add tasks with specific titles, scheduled times, categories, priorities, and repeat options, along with a reminder delay to notify if tasks remain incomplete. Built with React Native and integrated with Supabase as the backend, the app now includes an authentication system to ensure user-specific task management. This update addresses the previous limitation where tasks were visible to all users.
 
-## Get started
+## Features
+- **Add Tasks**: Create tasks with a title, scheduled time, repeat option (Once, Daily, Weekly, Monthly), category (Personal, Work, Health, Shopping, Other), and priority (Low, Medium, High).
+- **Reminder System**: Set a reminder delay (in minutes) to receive notifications if tasks are not completed on time.
+- **Task History**: View completed tasks with timestamps and status (On Time, Late).
+- **Statistics**: Track task completion rates, total tasks, overdue tasks, and streaks with a weekly overview.
+- **Task Breakdown**: Analyze tasks by category and priority for better organization.
+- **Insights**: Receive personalized tips and performance feedback based on task completion.
+- **Authentication**: Secure login to ensure tasks are private to individual users.
 
-1. Install dependencies
+## Screenshots
+1. **Add Task Screen**: Interface to create a new task with all customizable options.
+2. **History Screen**: View of completed tasks filtered by This Week, This Month, or All Time.
+3. **Statistics Screen**: Overview of today's completion rate and weekly performance metrics.
+4. **Task Breakdown Screen**: Detailed breakdown of tasks by category and priority.
+5. **My Tasks Screen**: List of current tasks with completion status and options to delete.
 
+## Installation
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd task-scheduler-app
+   ```
+3. Install dependencies:
    ```bash
    npm install
    ```
-
-2. Start the app
-
+4. Set up Supabase:
+   - Create a Supabase project and obtain the API keys.
+   - Configure the `.env` file with your Supabase URL, anon key, and authentication settings.
+5. Run the app:
    ```bash
-   npx expo start
+   npx react-native run-android  # For Android
+   npx react-native run-ios      # For iOS
    ```
 
-In the output, you'll find options to open the app in a
+## Usage
+- Open the app and log in with your credentials on the authentication screen.
+- Navigate to the "Add Task" screen to create a new task.
+- Fill in the task details and click "Create Task" to save.
+- View and manage tasks in the "My Tasks" screen.
+- Check your progress and history in the "Statistics" and "History" screens.
+- Receive reminders based on the set delay if tasks are not completed.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Development
+- **Frontend**: Built with React Native for a cross-platform mobile experience.
+- **Backend**: Powered by Supabase for real-time database management and authentication.
+- **Contributors**:
+  - Concept by Ibrahim Garana.
+  - Developed with the help of Vishal Chaudhary (React Native Developer).
+  - Designed and developed with Bolt AI Agent, integrated with Supabase.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Contributing
+Contributions are welcome! Please fork the repository and submit pull requests with your changes. Ensure to follow the existing code style and include tests where applicable.
 
-## Get a fresh project
+## License
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
-When you're ready, run:
+## Contact
+For any questions or suggestions, feel free to reach out to Ibrahim Garana or Vishal Chaudhary.
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
