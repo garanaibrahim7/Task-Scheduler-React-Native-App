@@ -6,6 +6,7 @@ import {
   ScrollView,
   RefreshControl,
   Dimensions,
+  Linking,
 } from 'react-native';
 import { useTaskContext } from '@/app/contexts/TaskContext';
 import { supabase } from '@/lib/supabase';
@@ -231,28 +232,47 @@ export default function StatsScreen() {
               {stats.completionRate >= 80
                 ? '🎉 Great job! You are maintaining an excellent completion rate.'
                 : stats.completionRate >= 50
-                ? '👍 Good progress! Keep pushing to reach your daily goals.'
-                : '💪 Stay focused! Break down tasks and tackle them one at a time.'}
+                  ? '👍 Good progress! Keep pushing to reach your daily goals.'
+                  : '💪 Stay focused! Break down tasks and tackle them one at a time.'}
             </Text>
           </View>
+        </View>
 
-          {stats.overdueCount > 0 && (
-            <View style={[styles.insightCard, styles.warningCard]}>
-              <Text style={styles.insightText}>
-                You have {stats.overdueCount} overdue {stats.overdueCount === 1 ? 'task' : 'tasks'}.
-                Try to complete them soon!
-              </Text>
-            </View>
-          )}
+        {stats.overdueCount > 0 && (
+          <View style={[styles.insightCard, styles.warningCard]}>
+            <Text style={styles.insightText}>
+              You have {stats.overdueCount} overdue {stats.overdueCount === 1 ? 'task' : 'tasks'}.
+              Try to complete them soon!
+            </Text>
+          </View>
+        )}
 
-          {weeklyStats.onTimeCount > weeklyStats.lateCount && weeklyStats.onTimeCount > 0 && (
-            <View style={[styles.insightCard, styles.successCard]}>
-              <Text style={styles.insightText}>
-                You completed {weeklyStats.onTimeCount} tasks on time this week. Excellent time
-                management!
-              </Text>
-            </View>
-          )}
+        {weeklyStats.onTimeCount > weeklyStats.lateCount && weeklyStats.onTimeCount > 0 && (
+          <View style={[styles.insightCard, styles.successCard]}>
+            <Text style={styles.insightText}>
+              You completed {weeklyStats.onTimeCount} tasks on time this week. Excellent time
+              management!
+            </Text>
+          </View>
+        )}
+        <View style={[styles.insightCard, styles.infoCard]}>
+          <Text style={styles.insightText}>
+            This App Concept is by{' '}
+            <Text onPress={() => Linking.openURL('https://www.linkedin.com/in/garanaibrahim7/')} style={{ fontWeight: 'bold', color: '#2563eb' }}>
+              Ibrahim Garana, {'\n'}
+            </Text>
+            With the Help of{' '}
+            <Text onPress={() => Linking.openURL('https://www.linkedin.com/in/vishal-chaudhary-02454a211/')} style={{ fontWeight: 'bold', color: '#2563eb' }}>
+              Vishal Chaudhary
+            </Text>
+            {' '}(React Native Developer)
+          </Text>
+        </View>
+        <View style={[styles.insightCard, styles.infoCard]}>
+          <Text style={styles.insightText}>
+            Developed and Designed with Bolt AI Agent, {'\n'}
+            with Integrated Supbase.
+          </Text>
         </View>
       </View>
     </ScrollView>
@@ -426,6 +446,10 @@ const styles = StyleSheet.create({
   },
   successCard: {
     borderLeftColor: '#10b981',
+    backgroundColor: '#f0fdf4',
+  },
+  infoCard: {
+    borderLeftColor: '#0d3458ff',
     backgroundColor: '#f0fdf4',
   },
   insightText: {

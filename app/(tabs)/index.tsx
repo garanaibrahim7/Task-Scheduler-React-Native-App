@@ -34,20 +34,7 @@ export default function TasksScreen() {
   };
 
   const handleResetDaily = async () => {
-    Alert.alert(
-      'Reset Daily Tasks',
-      'This will refresh the task list and reset completion status for new day.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          onPress: async () => {
-            await resetDailyTasks();
-            Alert.alert('Success', 'Daily tasks have been reset!');
-          },
-        },
-      ]
-    );
+    await resetDailyTasks();
   };
 
   const isTaskOverdue = (task: TaskWithCompletion) => {
@@ -154,9 +141,9 @@ export default function TasksScreen() {
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Today's Tasks</Text>
-        <TouchableOpacity onPress={handleResetDaily} style={styles.resetButton}>
+        {/* <TouchableOpacity onPress={handleResetDaily} style={styles.resetButton}>
           <RefreshCw size={20} color="#2563eb" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {tasks.length === 0 ? (

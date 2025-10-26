@@ -59,7 +59,7 @@ export async function scheduleTaskReminder(task: TaskWithCompletion) {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Task Reminder',
-        body: `Don't forget: ${task.title}`,
+        body: `You Didn't Completed ${task.title} yet!`,
         data: { taskId: task.id },
         sound: true,
       },
@@ -69,7 +69,7 @@ export async function scheduleTaskReminder(task: TaskWithCompletion) {
       } as any,
     });
 
-    console.log(`Scheduled notification for task: ${task.title} at ${reminderTime}`);
+    // console.log(`Scheduled notification for task: ${task.title} at ${reminderTime}`);
   } catch (error) {
     console.error('Error scheduling notification:', error);
   }
@@ -83,7 +83,7 @@ export async function cancelTaskReminder(taskId: string) {
   for (const notification of scheduledNotifications) {
     if (notification.content.data?.taskId === taskId) {
       await Notifications.cancelScheduledNotificationAsync(notification.identifier);
-      console.log(`Cancelled notification for task: ${taskId}`);
+      // console.log(`Cancelled notification for task: ${taskId}`);
     }
   }
 }
