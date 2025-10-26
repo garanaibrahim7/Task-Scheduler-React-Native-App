@@ -12,12 +12,6 @@ Users can add tasks with specific titles, scheduled times, categories, prioritie
 - **Insights**: Receive personalized tips and performance feedback based on task completion.
 - **Authentication**: Secure login to ensure tasks are private to individual users.
 
-## Screenshots
-1. **Add Task Screen**: Interface to create a new task with all customizable options.
-2. **History Screen**: View of completed tasks filtered by This Week, This Month, or All Time.
-3. **Statistics Screen**: Overview of today's completion rate and weekly performance metrics.
-4. **Task Breakdown Screen**: Detailed breakdown of tasks by category and priority.
-5. **My Tasks Screen**: List of current tasks with completion status and options to delete.
 
 ## Installation
 1. Clone the repository:
