@@ -115,7 +115,7 @@ export async function scheduleDailyReset() {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'New Day, New Tasks!',
-        body: 'Your daily tasks have been reset',
+        body: 'Hey, Be Ready to Tackle Your Tasks for Today!',
         data: { type: 'daily_reset' },
       },
       trigger: {
